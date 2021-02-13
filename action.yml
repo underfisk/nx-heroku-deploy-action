@@ -7,6 +7,7 @@ inputs:
     required: true
   dockerfile_path:
     description: 'Dockerfile path'
+    default: ./Dockerfile
     required: false
   ci_config_path:
     description: 'NX CI config file path, this file will specify which branches are whitelisted and the map of app-branches'

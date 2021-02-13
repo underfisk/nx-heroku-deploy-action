@@ -40,6 +40,7 @@ const core = __importStar(__nccwpck_require__(6832));
 /**
  * Returns a function that allows to perform an action to given appName
  * @param {string} appName - Heroku App Name
+ * @param formation
  * @returns {function}
  */
 function herokuActionSetUp(appName, formation) {
@@ -101,14 +102,12 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__nccwpck_require__(6832));
 const github = __importStar(__nccwpck_require__(3817));
 const heroku_action_1 = __nccwpck_require__(6906);
-const util_1 = __nccwpck_require__(1669);
 const fs = __importStar(__nccwpck_require__(5747));
 const child_process_1 = __nccwpck_require__(3129);
-const execPromise = util_1.promisify(__nccwpck_require__(3129).exec);
-let appName = "";
-let herokuAppName = "";
-let herokuEmail = "";
-let herokuFormation = "web";
+let appName = '';
+let herokuAppName = '';
+let herokuEmail = '';
+let herokuFormation = 'web';
 function validateConfigFile(config, currentBranch) {
     //Ensure we have apps defined
     if (!config.apps || Object.keys(config.apps).length === 0) {
@@ -131,7 +130,12 @@ function validateConfigFile(config, currentBranch) {
     }
     //Get the app that contains the currentBranch
     const row = Object.entries(config.apps)
-        .map(([name, value]) => ({ name, branches: value.branches, herokuAppName: value.herokuAppName, formation: value.formation }))
+        .map(([name, value]) => ({
+        name,
+        branches: value.branches,
+        herokuAppName: value.herokuAppName,
+        formation: value.formation
+    }))
         .find(e => e.branches.includes(currentBranch));
     if (row === undefined) {
         throw new Error(`${currentBranch} is not supported by any application. Please make sure an application has this branch as its target`);
@@ -149,9 +153,9 @@ function loadConfigFile() {
         core.info(`Loading configuration file at path: ${filePath}`);
         const content = fs.readFileSync(filePath, 'utf-8');
         const json = JSON.parse(content);
-        core.info("Ref: " + github.context.ref);
+        core.info(`Ref: ${github.context.ref}`);
         const branch = String(github.context.ref).replace('refs/heads/', '').trim();
-        core.info("Branch: " + branch);
+        core.info(`Branch: ${branch}`);
         const { email, name } = github.context.payload['pusher'];
         core.info(`Building is being created by ${name} with email ${email}`);
         validateConfigFile(json, branch);
@@ -170,8 +174,8 @@ function loginHeroku() {
     return __awaiter(this, void 0, void 0, function* () {
         const password = core.getInput('heroku_api_key');
         try {
-            yield execPromise(`echo ${password} | docker login --username=${herokuEmail} registry.heroku.com --password-stdin`);
-            console.log(`[${herokuEmail}] Logged in successfully ✅`);
+            yield child_process_1.exec(`echo ${password} | docker login --username=${herokuEmail} registry.heroku.com --password-stdin`);
+            core.info(`[${herokuEmail}] Logged in successfully ✅`);
         }
         catch (error) {
             core.setFailed(`Authentication process failed. Error: ${error.message}`);
@@ -190,9 +194,9 @@ function buildPushAndDeploy() {
                 throw new Error(`Dockerfile path does not exist, given path = ${dockerFilePath}`);
             }
             //If the path is defined we need to go inside it
-            if (dockerFilePath) {
-                yield execPromise(`cd ${dockerFilePath}`);
-            }
+            /*if (dockerFilePath) {
+              await exec(`cd ${dockerFilePath}`)
+            }*/
             const { stdout } = yield child_process_1.exec(herokuAction(`push ${pushOptions}`));
             core.startGroup('Building docker image.. 🛠');
             stdout === null || stdout === void 0 ? void 0 : stdout.on('data', (data) => {
@@ -200,7 +204,7 @@ function buildPushAndDeploy() {
             });
             core.endGroup();
             core.info('Container pushed to Heroku Container Registry ⏫');
-            yield execPromise(herokuAction('release'));
+            yield child_process_1.exec(herokuAction('release'));
             core.info('App Deployed successfully 🚀');
             /**
              * @todo Use like this https://github.com/AkhileshNS/heroku-deploy/blob/master/index.js
@@ -216,9 +220,7 @@ function buildPushAndDeploy() {
         }
     });
 }
-bootstrap()
-    .catch((error) => {
-    console.log({ message: error.message });
+bootstrap().catch(error => {
     core.setFailed(error.message);
 });
 

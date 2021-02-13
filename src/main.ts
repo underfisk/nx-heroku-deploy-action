@@ -113,9 +113,9 @@ async function buildPushAndDeploy() {
     }
 
     //If the path is defined we need to go inside it
-    if (dockerFilePath) {
+    /*if (dockerFilePath) {
       await exec(`cd ${dockerFilePath}`)
-    }
+    }*/
 
     const {stdout} = await exec(herokuAction(`push ${pushOptions}`))
     core.startGroup('Building docker image.. 🛠')
