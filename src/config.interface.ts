@@ -1,5 +1,5 @@
 interface ConfigValue {
-  herokuAppName: string
+  herokuAppName: string | Record<string, string>
   /** @default web **/
   formation?: 'web' | 'worker'
   branches: string[]

@@ -4,6 +4,7 @@
   "description": "Dynamic action that allows to build with external configuration a Docker container and deploy to Heroku Container Registry",
   "main": "dist/main",
   "scripts": {
+    "prebuild": "rimraf dist",
     "build": "tsc",
     "format": "prettier --write **/*.ts",
     "format-check": "prettier --check **/*.ts",

@@ -8,6 +8,9 @@ i do have a lot of projects under a mono-repo and i want to push via Github and 
 This file states the metadata that this action needs in order to provide also ARGs to the docker image 
 An example of a config file
 
+**Note** herokuAppName can also be a dictionary { [branchName]: appName } because sometimes you might want
+to create a relation between the branch and app name
+
 ```json 
 {
     "apps": {
@@ -38,3 +41,4 @@ jobs:
           heroku_api_key: ${{ secrets.HEROKU_API_KEY }} # your  heroku api key
           ci_config_path: 'my-custom-ci.json' #its optional by default we search for github-ci.json
 ```
+

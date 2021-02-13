@@ -70,7 +70,11 @@ function validateConfigFile(config, currentBranch) {
         throw new Error(`${currentBranch} is not supported by any application. Please make sure an application has this branch as its target`);
     }
     appName = row.name;
-    herokuAppName = row.herokuAppName;
+    herokuAppName = typeof row.herokuAppName === 'string' ? row.herokuAppName : row.herokuAppName[currentBranch];
+    if (!herokuAppName) {
+        throw new Error(`herokuAppName was not found, the given herokuAppName is of type ${typeof row.herokuAppName}. 
+    If you are using a dictionary then ensure the branch ${currentBranch} is registered in there.`);
+    }
     if (row.formation) {
         core.info(`Heroku formation was found with value: ${row.formation}`);
         herokuFormation = row.formation;

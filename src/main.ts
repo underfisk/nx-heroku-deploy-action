@@ -56,7 +56,15 @@ function validateConfigFile(config: IConfig, currentBranch: string) {
   }
 
   appName = row.name
-  herokuAppName = row.herokuAppName
+  herokuAppName =
+    typeof row.herokuAppName === 'string'
+      ? row.herokuAppName
+      : row.herokuAppName[currentBranch]
+  if (!herokuAppName) {
+    throw new Error(`herokuAppName was not found, the given herokuAppName is of type ${typeof row.herokuAppName}. 
+    If you are using a dictionary then ensure the branch ${currentBranch} is registered in there.`)
+  }
+
   if (row.formation) {
     core.info(`Heroku formation was found with value: ${row.formation}`)
     herokuFormation = row.formation
