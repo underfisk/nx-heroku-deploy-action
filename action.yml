@@ -1,0 +1,20 @@
+name: 'Build dynamic Docker Image to Heroku App'
+author: 'Underfisk'
+description: 'A simple action to build, push and deploy a Docker Image to your Heroku app.'
+inputs:
+  heroku_api_key:
+    description: "This will be used for authentication. You can find it in your heroku homepage account settings"
+    required: true
+  dockerfile_path:
+    description: 'Dockerfile path'
+    required: false
+  ci_config_path:
+    description: 'NX CI config file path, this file will specify which branches are whitelisted and the map of app-branches'
+    default: 'github-ci.json'
+    required: false
+branding:
+  icon: package
+  color: purple
+runs:
+  using: 'node12'
+  main: 'dist/index.js'
