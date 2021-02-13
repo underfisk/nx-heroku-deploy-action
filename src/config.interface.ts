@@ -1,11 +1,10 @@
-
 interface ConfigValue {
-    herokuAppName: string
-    /** @default web **/
-    formation?: 'web' | 'worker'
-    branches: string[]
+  herokuAppName: string
+  /** @default web **/
+  formation?: 'web' | 'worker'
+  branches: string[]
 }
 
 export interface IConfig {
-    apps: Record<string, ConfigValue>
+  apps: Record<string, ConfigValue>
 }

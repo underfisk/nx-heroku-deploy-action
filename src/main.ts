@@ -1,33 +1,35 @@
 import * as core from '@actions/core'
 import * as github from '@actions/github'
-import {IConfig} from "./config.interface";
-import {herokuActionSetUp} from "./heroku-action";
-import { promisify} from "util";
+import {IConfig} from './config.interface'
+import {herokuActionSetUp} from './heroku-action'
 import * as fs from 'fs'
-import { exec } from 'child_process'
-const execPromise = promisify(require('child_process').exec);
+import {exec} from 'child_process'
 
+let appName = ''
+let herokuAppName = ''
+let herokuEmail = ''
+let herokuFormation = 'web'
 
-let appName = ""
-let herokuAppName = ""
-let herokuEmail = ""
-let herokuFormation = "web"
-
-function validateConfigFile(config: IConfig, currentBranch: string){
+function validateConfigFile(config: IConfig, currentBranch: string) {
   //Ensure we have apps defined
   if (!config.apps || Object.keys(config.apps).length === 0) {
-    throw new Error('Your CI configuration must have apps property defined and at least 1 application')
+    throw new Error(
+      'Your CI configuration must have apps property defined and at least 1 application'
+    )
   }
 
   //Ensure that app exists
-  for(const [key, value] of Object.entries(config.apps)) {
+  for (const [key, value] of Object.entries(config.apps)) {
     const appPath = `./apps/${key}`
     const pathExists = fs.existsSync(appPath)
     if (!pathExists) {
-      throw new Error(`${appPath} does not exist, please ensure your application does exist`)
+      throw new Error(
+        `${appPath} does not exist, please ensure your application does exist`
+      )
     }
 
-    const hasBranches = value.branches !== undefined && Array.isArray(value.branches)
+    const hasBranches =
+      value.branches !== undefined && Array.isArray(value.branches)
     if (!hasBranches) {
       throw new Error(`Please provide valid branches list for app ${key}`)
     }
@@ -39,11 +41,18 @@ function validateConfigFile(config: IConfig, currentBranch: string){
 
   //Get the app that contains the currentBranch
   const row = Object.entries(config.apps)
-      .map(([name, value]) => ({ name, branches: value.branches, herokuAppName: value.herokuAppName, formation: value.formation }))
-      .find(e => e.branches.includes(currentBranch))
+    .map(([name, value]) => ({
+      name,
+      branches: value.branches,
+      herokuAppName: value.herokuAppName,
+      formation: value.formation
+    }))
+    .find(e => e.branches.includes(currentBranch))
 
   if (row === undefined) {
-    throw new Error(`${currentBranch} is not supported by any application. Please make sure an application has this branch as its target`)
+    throw new Error(
+      `${currentBranch} is not supported by any application. Please make sure an application has this branch as its target`
+    )
   }
 
   appName = row.name
@@ -54,16 +63,15 @@ function validateConfigFile(config: IConfig, currentBranch: string){
   }
 }
 
-
-async function loadConfigFile(){
+async function loadConfigFile() {
   const filePath = core.getInput('ci_config_path')
   core.info(`Loading configuration file at path: ${filePath}`)
   const content = fs.readFileSync(filePath, 'utf-8')
   const json = JSON.parse(content)
-  core.info("Ref: " + github.context.ref)
+  core.info(`Ref: ${github.context.ref}`)
   const branch = String(github.context.ref).replace('refs/heads/', '').trim()
-  core.info("Branch: " + branch)
-  const { email, name } = github.context.payload['pusher']
+  core.info(`Branch: ${branch}`)
+  const {email, name} = github.context.payload['pusher']
   core.info(`Building is being created by ${name} with email ${email}`)
 
   validateConfigFile(json, branch)
@@ -81,42 +89,45 @@ async function loginHeroku() {
   const password = core.getInput('heroku_api_key')
 
   try {
-    await execPromise(`echo ${password} | docker login --username=${herokuEmail} registry.heroku.com --password-stdin`);
-    console.log(`[${herokuEmail}] Logged in successfully ✅`);
+    await exec(
+      `echo ${password} | docker login --username=${herokuEmail} registry.heroku.com --password-stdin`
+    )
+    core.info(`[${herokuEmail}] Logged in successfully ✅`)
   } catch (error) {
-    core.setFailed(`Authentication process failed. Error: ${error.message}`);
+    core.setFailed(`Authentication process failed. Error: ${error.message}`)
   }
 }
 
-
 async function buildPushAndDeploy() {
   //Dockerfile path needs to be a directory and by default we are giving the filename which is wrong
-  const dockerFilePath = core.getInput('dockerfile_path');
-  const herokuAction = herokuActionSetUp(herokuAppName, herokuFormation);
+  const dockerFilePath = core.getInput('dockerfile_path')
+  const herokuAction = herokuActionSetUp(herokuAppName, herokuFormation)
   const pushOptions = `--arg APP_NAME=${appName}`
 
   try {
     const dockerFileExists = fs.existsSync(dockerFilePath)
     if (!dockerFileExists) {
-      throw new Error(`Dockerfile path does not exist, given path = ${dockerFilePath}`)
+      throw new Error(
+        `Dockerfile path does not exist, given path = ${dockerFilePath}`
+      )
     }
 
     //If the path is defined we need to go inside it
     if (dockerFilePath) {
-      await execPromise(`cd ${dockerFilePath}`);
+      await exec(`cd ${dockerFilePath}`)
     }
 
-    const { stdout } = await exec(herokuAction(`push ${pushOptions}`))
+    const {stdout} = await exec(herokuAction(`push ${pushOptions}`))
     core.startGroup('Building docker image.. 🛠')
     stdout?.on('data', (data: Buffer) => {
       core.info(data.toString())
     })
 
     core.endGroup()
-    core.info('Container pushed to Heroku Container Registry ⏫');
+    core.info('Container pushed to Heroku Container Registry ⏫')
 
-    await execPromise(herokuAction('release'));
-    core.info('App Deployed successfully 🚀');
+    await exec(herokuAction('release'))
+    core.info('App Deployed successfully 🚀')
     /**
      * @todo Use like this https://github.com/AkhileshNS/heroku-deploy/blob/master/index.js
      * they do check heroku healthcheck and it might be good for us to determinate rollbacks
@@ -126,14 +137,12 @@ async function buildPushAndDeploy() {
      * We need to cache docker layers/fragments to prevent a lot of execution time
      */
   } catch (error) {
-    core.setFailed(`Error pushing/releasing your docker image to Heroku: ${error.message}`);
+    core.setFailed(
+      `Error pushing/releasing your docker image to Heroku: ${error.message}`
+    )
   }
 }
 
-
-bootstrap()
-    .catch((error) => {
-      console.log({ message: error.message });
-      core.setFailed(error.message);
-    })
-
+bootstrap().catch(error => {
+  core.setFailed(error.message)
+})
