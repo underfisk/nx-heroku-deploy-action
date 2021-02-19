@@ -70,7 +70,10 @@ function validateConfigFile(config, currentBranch) {
         throw new Error(`${currentBranch} is not supported by any application. Please make sure an application has this branch as its target`);
     }
     appName = row.name;
-    herokuAppName = typeof row.herokuAppName === 'string' ? row.herokuAppName : row.herokuAppName[currentBranch];
+    herokuAppName =
+        typeof row.herokuAppName === 'string'
+            ? row.herokuAppName
+            : row.herokuAppName[currentBranch];
     if (!herokuAppName) {
         throw new Error(`herokuAppName was not found, the given herokuAppName is of type ${typeof row.herokuAppName}. 
     If you are using a dictionary then ensure the branch ${currentBranch} is registered in there.`);
@@ -133,7 +136,7 @@ function buildPushAndDeploy() {
             const { stdout } = yield child_process_1.exec(herokuAction(`push ${pushOptions}`));
             core.startGroup('Building docker image.. 🛠');
             stdout === null || stdout === void 0 ? void 0 : stdout.on('data', (data) => {
-                core.info(data.toString());
+                core.debug(data.toString());
             });
             core.endGroup();
             core.info('Container pushed to Heroku Container Registry ⏫');

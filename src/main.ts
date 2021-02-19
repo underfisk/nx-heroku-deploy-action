@@ -60,6 +60,7 @@ function validateConfigFile(config: IConfig, currentBranch: string) {
     typeof row.herokuAppName === 'string'
       ? row.herokuAppName
       : row.herokuAppName[currentBranch]
+
   if (!herokuAppName) {
     throw new Error(`herokuAppName was not found, the given herokuAppName is of type ${typeof row.herokuAppName}. 
     If you are using a dictionary then ensure the branch ${currentBranch} is registered in there.`)
@@ -128,7 +129,7 @@ async function buildPushAndDeploy() {
     const {stdout} = await exec(herokuAction(`push ${pushOptions}`))
     core.startGroup('Building docker image.. 🛠')
     stdout?.on('data', (data: Buffer) => {
-      core.info(data.toString())
+      core.debug(data.toString())
     })
 
     core.endGroup()
