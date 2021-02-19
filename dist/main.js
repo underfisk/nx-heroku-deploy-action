@@ -133,13 +133,10 @@ function buildPushAndDeploy() {
             /*if (dockerFilePath) {
               await exec(`cd ${dockerFilePath}`)
             }*/
-            const { stdout } = yield child_process_1.exec(herokuAction(`push ${pushOptions}`));
-            core.startGroup('Building docker image.. 🛠');
-            stdout === null || stdout === void 0 ? void 0 : stdout.on('data', (data) => {
-                core.debug(data.toString());
-            });
-            core.endGroup();
+            core.info("Pushing container to heroku registry..");
+            yield child_process_1.exec(herokuAction(`push ${pushOptions}`));
             core.info('Container pushed to Heroku Container Registry ⏫');
+            core.info("Releasing container to heroku..");
             yield child_process_1.exec(herokuAction('release'));
             core.info('App Deployed successfully 🚀');
             /**

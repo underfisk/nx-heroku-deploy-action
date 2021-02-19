@@ -126,15 +126,11 @@ async function buildPushAndDeploy() {
       await exec(`cd ${dockerFilePath}`)
     }*/
 
-    const {stdout} = await exec(herokuAction(`push ${pushOptions}`))
-    core.startGroup('Building docker image.. 🛠')
-    stdout?.on('data', (data: Buffer) => {
-      core.debug(data.toString())
-    })
-
-    core.endGroup()
+    core.info('Pushing container to heroku registry..')
+    await exec(herokuAction(`push ${pushOptions}`))
     core.info('Container pushed to Heroku Container Registry ⏫')
 
+    core.info('Releasing container to heroku..')
     await exec(herokuAction('release'))
     core.info('App Deployed successfully 🚀')
     /**
