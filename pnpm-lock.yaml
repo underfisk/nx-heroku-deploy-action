@@ -6,8 +6,8 @@ settings:
 
 dependencies:
   '@actions/core':
-    specifier: ^1.2.3
-    version: 1.2.6
+    specifier: ^1.9.1
+    version: 1.9.1
   '@actions/github':
     specifier: ^2.1.1
     version: 2.2.0(@octokit/core@5.0.0)
@@ -55,8 +55,11 @@ devDependencies:
 
 packages:
 
-  /@actions/core@1.2.6:
-    resolution: {integrity: sha512-ZQYitnqiyBc3D+k7LsgSBmMDVkOVidaagDG7j3fOym77jNunWRuYx7VSHa9GNfFZh+zh61xsCjRj4JxMZlDqTA==}
+  /@actions/core@1.9.1:
+    resolution: {integrity: sha512-5ad+U2YGrmmiw6du20AQW5XuWo7UKN2052FjSV7MX+Wfjf8sCqcsZe62NfgHys4QI4/Y+vQvLKYL8jWtA1ZBTA==}
+    dependencies:
+      '@actions/http-client': 2.1.1
+      uuid: 8.3.2
     dev: false
 
   /@actions/github@2.2.0(@octokit/core@5.0.0):
@@ -71,6 +74,12 @@ packages:
 
   /@actions/http-client@1.0.9:
     resolution: {integrity: sha512-0O4SsJ7q+MK0ycvXPl2e6bMXV7dxAXOGjrXS1eTF9s2S401Tp6c/P3c3Joz04QefC1J6Gt942Wl2jbm3f4mLcg==}
+    dependencies:
+      tunnel: 0.0.6
+    dev: false
+
+  /@actions/http-client@2.1.1:
+    resolution: {integrity: sha512-qhrkRMB40bbbLo7gF+0vu+X+UawOvQQqNAA/5Unx774RS8poaOhThDOG6BGmxvAnxhQnDp2BG/ZUm65xZILTpw==}
     dependencies:
       tunnel: 0.0.6
     dev: false
@@ -4826,14 +4835,13 @@ packages:
 
   /uuid@3.4.0:
     resolution: {integrity: sha512-HjSDRw6gZE5JMggctHBcjVak08+KEVhSIiDzFnT9S9aegmp85S/bReBVTb4QTFaRNptJ9kuYaNhnbNEOkbKb/A==}
+    deprecated: Please upgrade  to version 7 or higher.  Older versions may use Math.random() in certain circumstances, which is known to be problematic.  See https://v8.dev/blog/math-random for details.
     hasBin: true
     dev: true
 
   /uuid@8.3.2:
     resolution: {integrity: sha512-+NYs2QeMWy+GWFOEm9xnn6HCDp0l7QBD7ml8zLUmJ+93Q5NF0NocErnwkTkXVFNiX3/fpC6afS8Dhb/gz7R7eg==}
     hasBin: true
-    dev: true
-    optional: true
 
   /v8-compile-cache@2.2.0:
     resolution: {integrity: sha512-gTpR5XQNKFwOd4clxfnhaqvfqMpqEwr4tOtCyz4MtYZX2JYhfr1JvBFKdS+7K/9rfpZR3VLX+YWBbKoxCgS43Q==}
