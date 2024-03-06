@@ -121,11 +121,6 @@ async function buildPushAndDeploy() {
       )
     }
 
-    //If the path is defined we need to go inside it
-    /*if (dockerFilePath) {
-      await exec(`cd ${dockerFilePath}`)
-    }*/
-
     core.info('Pushing container to heroku registry..')
     await exec(herokuAction(`push ${pushOptions}`))
     core.info('Container pushed to Heroku Container Registry ⏫')
